@@ -1,3 +1,3 @@
 # CVXR Example Collection
 
-- [Simple Least Squares]("ls/ls.ipynb")
+- [Simple Least Squares](ls/ls.ipynb)
