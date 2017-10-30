@@ -1,0 +1,57 @@
+## Table of Functions
+
+```{r, echo = FALSE}
+emitRow <- function(lines, start, end) {
+    ## Remove "* " from beginning of row
+    content <- gsub("^\\* ", "", lines[start:(end-1)])
+    colStart <- which(grepl("^-", content))
+    colEnd <- c(colStart[-1] - 1, length(content))
+    d <- data.frame(colStart = colStart, colEnd = colEnd)
+    sapply(seq_len(nrow(d)),
+           function(j) emitCol(content, colStart[j], colEnd[j]))
+}
+
+emitCol <- function(lines, start, end) {
+    ## Remove "- " from beginning of column
+    lines <- gsub("^\\- ", "", lines[start:end])
+    ## Strip ref and math and backticks
+    lines <- gsub("^\\:ref\\:", "", lines)
+    lines <- gsub("\\:math\\:", "", lines)
+    lines <- gsub("\\|incr\\|", "![](functions_files/increasing.png)", lines)
+    lines <- gsub("\\|decr\\|", "![](functions_files/decreasing.png)", lines)
+    lines <- gsub("\\|positive\\|", "![](functions_files/positive.png)", lines)
+    lines <- gsub("\\|negative\\|", "![](functions_files/negative.png)", lines)
+    lines <- gsub("\\|unknown\\|", "![](functions_files/unknown.png)", lines)
+    lines <- gsub("\\|concave\\|", "![](functions_files/concave.png)", lines)
+    lines <- gsub("\\|convex\\|", "![](functions_files/convex.png)", lines)
+    lines <- gsub("\\|affine\\|", "![](functions_files/affine.png)", lines)
+    lines <- gsub("\\`", "$", lines)
+    ## Fix up pnorm
+    lines <- gsub("p == 'inf'", "\\`p = Inf\\`", lines)
+    lines[nchar(lines) > 0]
+}
+
+inFile <- "index-func-part1.rst"
+library(stringr)
+lines <- stringr::str_trim(readLines(inFile))
+
+## Fix for pnorm since it uses :ref:
+lines <- gsub("^\\* - \\:ref\\:\\`pnorm\\(X, p\\) <pnorm>\\`", "* - pnorm(X, p)", lines)
+lines <- gsub("\\`\\`p = 'inf'\\`\\`", "p == 'inf'", lines)
+## End of fix
+
+start <- which(grepl("^\\*", lines))
+end <- c(start[-1] - 1, length(lines))
+coords <- data.frame(start = start, end = end)
+rows <- lapply(seq_len(nrow(coords)),
+               function(i) emitRow(lines, coords$start[i], coords$end[i]))
+table <- do.call(rbind, rows)
+colnames(table) <- table[1, ]
+colnames(table)[5] <- "Curvature"
+table <- table[-1, ]
+
+```
+```{r, echo = FALSE}
+kable(table)
+```
+
